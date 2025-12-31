@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Master 2.0</title>
+    <style>
+        body {
+            background: radial-gradient(circle at center, #5dade2, #2e86c1);
+            color: #2c3e50;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 360px;
+            height: 740px;
+            background: url('https://www.transparenttextures.com/patterns/sky-background.png'), linear-gradient(to bottom, #87ceeb 0%, #e0f6ff 100%);
+            background-size: cover;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,0,0,0.4);
+            border-radius: 40px;
+            border: 4px solid #fff;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            z-index: 10;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+        }
+
+        .coin-bar {
+            background: linear-gradient(to bottom, #fdf2cc, #f3e5ab);
+            border: 1.5px solid #8b4513;
+            border-radius: 6px;
+            padding: 4px 10px 4px 30px;
+            position: relative;
+            box-shadow: 0 2px 0 #5d2e0a;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .coin-icon {
+            position: absolute;
+            left: -8px;
+            top: -4px;
+            width: 32px;
+            height: 32px;
+            background: radial-gradient(circle at 30% 30%, #ffe44d, #f1c40f 60%, #b7950b);
+            border: 2px solid #5d2e0a;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .coin-inner {
+            width: 20px;
+            height: 20px;
+            border: 1.5px solid #8b4513;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #8b4513;
+            font-size: 0.7rem;
+            font-weight: 900;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .star-lvl {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: linear-gradient(to bottom, #2c3e50, #1a252f);
+            padding: 2px 10px;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.9rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            border: 1px solid #f1c40f;
+            cursor: pointer;
+        }
+
+        .shields-container {
+            display: flex;
+            gap: 3px;
+        }
+
+        .shield-item {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #ff6b6b, #c0392b);
+            border-radius: 50%;
+            border: 2px solid white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
+
+        #slot-machine-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding-bottom: 80px;
+        }
+
+        #win-display {
+            background: linear-gradient(to bottom, #6dd5ed, #2193b0);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 900;
+            padding: 4px 25px;
+            border-radius: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            border: 2px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        #slot-frame {
+            width: 300px;
+            background: linear-gradient(135deg, #795548, #3e2723);
+            border: 8px solid #2b1d1a;
+            border-radius: 30px;
+            padding: 15px 10px;
+            box-shadow: 0 15px 0 #1a1210, inset 0 0 30px rgba(0,0,0,0.6);
+            position: relative;
+        }
+
+        .reels {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .reel-container {
+            width: 80px;
+            height: 100px;
+            background: linear-gradient(to bottom, #fff, #f0f0f0);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 5px 10px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .reel-strip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.6s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        }
+
+        .reel-symbol {
+            width: 100%;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+        }
+
+        .spinning .reel-strip {
+            animation: fastSpin 0.1s linear infinite;
+        }
+
+        @keyframes fastSpin {
+            0% { transform: translateY(0); filter: blur(4px); }
+            100% { transform: translateY(-200px); filter: blur(10px); }
+        }
+
+        .bet-badge {
+            background: linear-gradient(to bottom, #f1c40f, #f39c12);
+            color: #5d2e0a;
+            padding: 6px 30px;
+            border-radius: 20px;
+            font-weight: 900;
+            border: 2px solid #fff;
+            margin-bottom: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #d35400;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        .spin-progress-section {
+            width: 85%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .spin-bar-outer {
+            width: 100%;
+            height: 24px;
+            background: #1a1210;
+            border-radius: 12px;
+            border: 2px solid #5d4037;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        #spin-fill {
+            height: 100%;
+            background: linear-gradient(to right, #00f2fe, #4facfe);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .spin-count-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 0;
+            line-height: 24px;
+            color: white;
+            font-weight: 900;
+            font-size: 0.85rem;
+            text-shadow: 1px 1px 2px black;
+            pointer-events: none;
+        }
+
+        #overflow-spins {
+            color: #3e2723;
+            font-weight: 900;
+            font-size: 0.9rem;
+            margin-top: 2px;
+        }
+
+        .spin-area {
+            margin-top: 10px;
+        }
+
+        .main-spin-btn {
+            width: 220px;
+            height: 75px;
+            background: linear-gradient(to bottom, #ff7e5f, #feb47b);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 0 #d35400;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 900;
+            cursor: pointer;
+            text-shadow: 0 3px 3px rgba(0,0,0,0.3);
+            transition: 0.1s;
+        }
+
+        .main-spin-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 5px 0 #d35400;
+        }
+
+        .bottom-clouds {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .cloud-svg {
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            filter: drop-shadow(0 -5px 10px rgba(0,0,0,0.1));
+        }
+
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 30;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: auto;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .nav-btn:active {
+            transform: scale(0.9);
+        }
+
+        .village-btn-circle {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #7ed957, #2ecc71);
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 900;
+            color: #2c3e50;
+            text-transform: uppercase;
+            text-shadow: 0 1px 2px white;
+        }
+
+        .overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 100;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            backdrop-filter: blur(4px);
+        }
+
+        .menu-overlay {
+            display: none;
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 80%;
+            background: linear-gradient(to bottom, #fdfefe, #ebedef);
+            z-index: 150;
+            border-radius: 40px 40px 0 0;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+            flex-direction: column;
+            padding: 20px;
+            color: #2c3e50;
+            box-sizing: border-box;
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #d5dbdb;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .village-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .village-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 2px solid transparent;
+        }
+
+        .village-item.active {
+            border-color: #4facfe;
+            background: linear-gradient(to right, #ffffff, #f0faff);
+        }
+
+        .village-item.locked {
+            opacity: 0.6;
+            filter: grayscale(1);
+        }
+
+        .village-upgrade-action {
+            margin-left: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .village-upgrade-btn {
+            background: linear-gradient(to bottom, #7ed957, #2ecc71);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.75rem;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #27ae60;
+            border: 1px solid #fff;
+            white-space: nowrap;
+        }
+
+        .village-upgrade-btn:disabled {
+            filter: grayscale(1);
+            opacity: 0.7;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: translateY(2px);
+        }
+
+        .village-progress-tiny {
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: #7f8c8d;
+        }
+
+        .village-icon {
+            font-size: 2.5rem;
+            margin-right: 15px;
+        }
+
+        .village-info h4 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .village-info p {
+            margin: 3px 0 0;
+            font-size: 0.75rem;
+            color: #7f8c8d;
+        }
+
+        .close-menu {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="reward-overlay" class="overlay">
+        <h2 id="reward-title">WINNER!</h2>
+        <div id="reward-content" style="font-size:2.5rem; margin:15px 0">🪙 10,000</div>
+        <button class="main-spin-btn" style="height:50px; font-size:1.2rem; width:150px" onclick="closeOverlay('reward-overlay')">COLLECT</button>
+    </div>
+
+    <div id="village-menu" class="menu-overlay">
+        <div class="menu-header">
+            <h3>Villages</h3>
+            <button class="close-menu" onclick="toggleMenu('village-menu')">×</button>
+        </div>
+        <div id="village-list" class="village-list"></div>
+    </div>
+
+    <header>
+        <div class="coin-bar">
+            <div class="coin-icon"><div class="coin-inner">C</div></div>
+            <span id="coins">107,560</span>
+        </div>
+        <div class="star-lvl" onclick="toggleMenu('village-menu')">
+            <span style="color:#f1c40f">⭐</span> <span id="star-count">1</span>
+        </div>
+        <div class="shields-container">
+            <div class="shield-item">🛡️</div>
+            <div class="shield-item">🛡️</div>
+            <div class="shield-item">🛡️</div>
+        </div>
+    </header>
+
+    <div id="slot-machine-wrapper">
+        <div id="win-display">JACKPOT!</div>
+        
+        <div id="slot-frame">
+            <div class="reels">
+                <div class="reel-container"><div class="reel-strip" id="strip1"></div></div>
+                <div class="reel-container"><div class="reel-strip" id="strip2"></div></div>
+                <div class="reel-container"><div class="reel-strip" id="strip3"></div></div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; align-items:center">
+                <div class="bet-badge" id="bet-display" onclick="cycleBet()">BET x1 ⚡</div>
+                
+                <div class="spin-progress-section">
+                    <div class="spin-bar-outer">
+                        <div id="spin-fill"></div>
+                        <div class="spin-count-text"><span id="spin-current">20</span>/50</div>
+                    </div>
+                    <div id="overflow-spins"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="spin-area">
+            <button id="spin-button" class="main-spin-btn">SPIN</button>
+        </div>
+    </div>
+
+    <div class="bottom-clouds">
+        <svg class="cloud-svg" viewBox="0 0 500 120" preserveAspectRatio="none">
+            <path d="M0,120 L500,120 L500,60 C450,40 400,80 350,60 C300,40 250,70 200,50 C150,30 100,60 50,40 C25,30 0,50 0,60 Z" fill="white"></path>
+        </svg>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-btn" onclick="toggleMenu('village-menu')">
+            <div class="village-btn-circle">🏘️</div>
+            <div class="nav-label">Village</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let state = {
+        coins: 107560,
+        spins: 20,
+        maxSpins: 50,
+        bet: 1,
+        village: 1,
+        villageProgress: 2,
+        maxProgress: 5,
+        upgradeCostBase: 5000
+    };
+
+    const villageData = [
+        { id: 1, name: "Viking Valley", icon: "🏘️" },
+        { id: 2, name: "Ancient Egypt", icon: "🏜️" },
+        { id: 3, name: "Snowy Alps", icon: "🏔️" },
+        { id: 4, name: "Tropical Island", icon: "🏝️" },
+        { id: 5, name: "Deep Jungle", icon: "🐒" }
+    ];
+
+    const symbols = ['🪙', '🔨', '🐷', '⚡', '🛡️', '⚔️'];
+
+    function initReels() {
+        [1,2,3].forEach(i => {
+            const strip = document.getElementById('strip'+i);
+            strip.innerHTML = Array(3).fill('<div class="reel-symbol">🪙</div>').join('');
+        });
+        renderVillageList();
+    }
+
+    function toggleMenu(id) {
+        const menu = document.getElementById(id);
+        const isOpen = menu.style.display === 'flex';
+        menu.style.display = isOpen ? 'none' : 'flex';
+        if (!isOpen) renderVillageList();
+    }
+
+    function getUpgradeCost() {
+        return state.upgradeCostBase * state.village * (state.villageProgress + 1);
+    }
+
+    function upgradeFromMenu() {
+        const cost = getUpgradeCost();
+        if (state.coins >= cost) {
+            state.coins -= cost;
+            state.villageProgress += 1;
+            if (state.villageProgress >= state.maxProgress) {
+                state.villageProgress = 0;
+                state.village += 1;
+                showReward("NEW VILLAGE!", villageData[state.village - 1]?.name || "New Land");
+            }
+            renderVillageList();
+            updateUI();
+        }
+    }
+
+    function renderVillageList() {
+        const list = document.getElementById('village-list');
+        const cost = getUpgradeCost();
+        const canAfford = state.coins >= cost;
+
+        list.innerHTML = villageData.map(v => {
+            const isCurrent = v.id === state.village;
+            const isLocked = v.id > state.village;
+            const rank = Math.floor((v.id - 1) / 5) + 1;
+            
+            return `
+                <div class="village-item ${isCurrent ? 'active' : ''} ${isLocked ? 'locked' : ''}">
+                    <div class="village-icon">${v.icon}</div>
+                    <div class="village-info">
+                        <h4>${v.name}</h4>
+                        <p>${isLocked ? 'Locked' : isCurrent ? 'Current Village' : 'Completed'}</p>
+                    </div>
+                    ${isCurrent ? `
+                        <div class="village-upgrade-action">
+                            <button class="village-upgrade-btn" onclick="upgradeFromMenu()" ${!canAfford ? 'disabled' : ''}>
+                                UPGRADE 🪙 ${cost.toLocaleString()}
+                            </button>
+                            <span class="village-progress-tiny">${state.villageProgress}/${state.maxProgress}</span>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+    }
+
+    function cycleBet() {
+        const bets = [1, 2, 3, 5];
+        let idx = bets.indexOf(state.bet);
+        state.bet = bets[(idx + 1) % bets.length];
+        document.getElementById('bet-display').innerText = `BET x${state.bet} ⚡`;
+    }
+
+    document.getElementById('spin-button').onclick = () => {
+        if (state.spins < state.bet) return;
+        state.spins -= state.bet;
+        const btn = document.getElementById('spin-button');
+        btn.disabled = true;
+        document.querySelectorAll('.reel-container').forEach(c => c.classList.add('spinning'));
+
+        setTimeout(() => {
+            const results = [];
+            [1,2,3].forEach(i => {
+                const res = symbols[Math.floor(Math.random() * symbols.length)];
+                results.push(res);
+                const strip = document.getElementById('strip'+i);
+                strip.innerHTML = `<div class="reel-symbol">?</div><div class="reel-symbol">${res}</div><div class="reel-symbol">?</div>`;
+                strip.style.transform = 'translateY(-100px)';
+            });
+            document.querySelectorAll('.reel-container').forEach(c => c.classList.remove('spinning'));
+            processResults(results);
+            btn.disabled = false;
+            updateUI();
+        }, 800);
+    };
+
+    function processResults(res) {
+        if (res[0] === res[1] && res[1] === res[2]) {
+            if (res[0] === '🔨') {
+                state.villageProgress += 1;
+                if (state.villageProgress >= state.maxProgress) {
+                    state.villageProgress = 0;
+                    state.village += 1;
+                    showReward("NEW VILLAGE!", villageData[state.village - 1]?.name || "New Land");
+                }
+            } else if (res[0] === '⚡') {
+                state.spins += 10 * state.bet;
+            } else {
+                state.coins += 25000 * state.bet;
+                showReward("BIG WIN!", `🪙 ${(25000 * state.bet).toLocaleString()}`);
+            }
+        } else {
+            state.coins += 500 * state.bet;
+        }
+    }
+
+    function showReward(title, content) {
+        document.getElementById('reward-title').innerText = title;
+        document.getElementById('reward-content').innerText = content;
+        document.getElementById('reward-overlay').style.display = 'flex';
+    }
+
+    function closeOverlay(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function updateUI() {
+        document.getElementById('coins').innerText = state.coins.toLocaleString();
+        
+        const spinVal = Math.min(state.spins, state.maxSpins);
+        const progressPercent = (spinVal / state.maxSpins) * 100;
+        document.getElementById('spin-fill').style.width = progressPercent + '%';
+        document.getElementById('spin-current').innerText = state.spins;
+
+        const overflow = state.spins > state.maxSpins ? `+${state.spins - state.maxSpins} EXTRA` : "";
+        document.getElementById('overflow-spins').innerText = overflow;
+
+        const rank = Math.floor((state.village - 1) / 5) + 1;
+        document.getElementById('star-count').innerText = rank;
+    }
+
+    window.onload = () => {
+        initReels();
+        updateUI();
+    };
+</script>
+</body>
+</html>
